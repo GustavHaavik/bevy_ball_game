@@ -1,20 +1,20 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
-use crate::game::sprites::{
-    constants::ARCHER,
-    resources::{get_index, KingdomSpriteSheet},
+use crate::{
+    constants::SAND,
+    sprites::{get_index, get_texture_atlas, TileMap},
 };
 
-use super::{components::Player, PLAYER_SIZE, PLAYER_SPEED};
+use super::{components::Player, resources::PlayerMovementSheet, PLAYER_SIZE, PLAYER_SPEED};
 
 pub fn spawn_player(
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
-    sprite_sheet: Res<KingdomSpriteSheet>,
+    tilemap: Res<PlayerMovementSheet>,
 ) {
     let window = window_query.get_single().unwrap();
 
-    let player_sprite = get_index(ARCHER).unwrap() as usize;
+    let player_sprite = get_index(SAND).unwrap() as usize;
 
     commands.spawn((
         SpriteSheetBundle {
@@ -24,7 +24,7 @@ pub fn spawn_player(
                 0.0,
             )),
             sprite: TextureAtlasSprite::new(player_sprite),
-            texture_atlas: sprite_sheet.0.clone(),
+            texture_atlas: tilemap.0.clone(),
             ..default()
         },
         Player {},
@@ -80,4 +80,23 @@ pub fn confine_movement(
             transform.translation.y = window.height() - PLAYER_SIZE / 2.0;
         }
     }
+}
+
+pub fn load_player_sprites(
+    mut commands: Commands,
+    assets_server: Res<AssetServer>,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+) {
+    let player_movement_handle = get_texture_atlas(
+        "sprites/player_movement.png".to_string(),
+        10,
+        1,
+        None,
+        PLAYER_SIZE,
+        PLAYER_SIZE,
+        &mut texture_atlases,
+        &assets_server,
+    );
+
+    commands.insert_resource(PlayerMovementSheet(player_movement_handle));
 }

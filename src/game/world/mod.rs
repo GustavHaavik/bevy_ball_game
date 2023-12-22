@@ -1,13 +1,12 @@
 use bevy::prelude::*;
 
 pub mod components;
-pub mod resources;
 mod systems;
+// pub mod resources;
 
 use systems::*;
 
 pub struct WorldPlugin;
-
 impl Plugin for WorldPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, init_world);

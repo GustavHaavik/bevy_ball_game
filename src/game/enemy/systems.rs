@@ -1,20 +1,20 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 use rand::random;
 
+use crate::constants::SAND;
 use crate::game::enemy::components::*;
 use crate::game::enemy::ENEMIES;
-use crate::game::sprites::constants::GHOST;
-use crate::game::sprites::resources::KingdomSpriteSheet;
-use crate::game::sprites::resources::get_index;
+use crate::sprites::TileMap;
+use crate::sprites::get_index;
 
 pub fn spawn_enemies(
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
-    sprite_sheet: Res<KingdomSpriteSheet>,
+    sprite_sheet: Res<TileMap>,
 ) {
     let window = window_query.get_single().unwrap();
 
-    let enemy_sprite = get_index(GHOST).unwrap() as usize;
+    let enemy_sprite = get_index(SAND).unwrap() as usize;
 
     for _ in 0..ENEMIES {
         let rand_x: f32 = random::<f32>() * window.width();
