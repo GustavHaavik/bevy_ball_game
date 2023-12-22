@@ -15,16 +15,22 @@ pub struct TileSprite {
 #[derive(Resource)]
 pub struct TileMap(pub Handle<TextureAtlas>);
 
-pub fn get_index(sprite: TileSprite) -> Result<i32, String> {
+#[derive(Resource)]
+pub struct SpritesSheet(pub Handle<TextureAtlas>);
+
+#[derive(Component)]
+pub struct AnimationIndices {
+    pub first: usize,
+    pub last: usize,
+}
+
+#[derive(Component, Deref, DerefMut)]
+pub struct AnimationTimer(pub Timer);
+
+pub fn get_index(sprite: TileSprite, columns: i32) -> i32 {
     let (col, row) = (sprite.column, sprite.row);
 
-    if col > 11 || row > 10 {
-        return Err(String::from("Invalid sprite index"));
-    }
-
-    let idx = (row * 12) + col;
-
-    Ok(idx)
+    (row * columns) + col
 }
 
 pub fn load_sprite_sheets(
@@ -43,7 +49,19 @@ pub fn load_sprite_sheets(
         &assets_server,
     );
 
+    let sprite_sheet_handle: Handle<TextureAtlas> = get_texture_atlas(
+        "sprites/spritesheet.png".to_string(),
+        28,
+        9,
+        None,
+        TILE_W as f32,
+        TILE_H as f32,
+        &mut texture_atlases,
+        &assets_server,
+    );
+
     commands.insert_resource(TileMap(tilemap_handle));
+    commands.insert_resource(SpritesSheet(sprite_sheet_handle));
 }
 
 pub fn get_texture_atlas(

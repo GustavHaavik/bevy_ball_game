@@ -15,8 +15,8 @@ pub const NOISE_SCALE: f32 = 15.0;
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins((
-            WorldPlugin,
-            // PlayerPlugin,
+            // WorldPlugin,
+            PlayerPlugin,
             // EnemyPlugin,
         ));
     }

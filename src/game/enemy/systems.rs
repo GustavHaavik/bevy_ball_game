@@ -14,7 +14,7 @@ pub fn spawn_enemies(
 ) {
     let window = window_query.get_single().unwrap();
 
-    let enemy_sprite = get_index(SAND).unwrap() as usize;
+    let enemy_sprite = get_index(SAND, 12) as usize;
 
     for _ in 0..ENEMIES {
         let rand_x: f32 = random::<f32>() * window.width();

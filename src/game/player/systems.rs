@@ -1,32 +1,47 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
-use crate::{
-    constants::SAND,
-    sprites::{get_index, get_texture_atlas, TileMap},
-};
+use crate::sprites::{get_index, AnimationIndices, AnimationTimer, SpritesSheet, TileSprite};
 
-use super::{components::Player, resources::PlayerMovementSheet, PLAYER_SIZE, PLAYER_SPEED};
+use super::{components::Player, PLAYER_SIZE, PLAYER_SPEED};
+
+struct PlayeRunningSprites {
+    first: TileSprite,
+    last: TileSprite,
+}
 
 pub fn spawn_player(
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
-    tilemap: Res<PlayerMovementSheet>,
+    sprite_sheet: Res<SpritesSheet>,
 ) {
     let window = window_query.get_single().unwrap();
 
-    let player_sprite = get_index(SAND).unwrap() as usize;
+    let player_sprite = PlayeRunningSprites {
+        first: TileSprite { column: 0, row: 5 },
+        last: TileSprite { column: 5, row: 5 },
+    };
+
+    let first_index = get_index(player_sprite.first, 28);
+    let last_index = get_index(player_sprite.last, 28);
+
+    let animation_indices = AnimationIndices {
+        first: first_index as usize,
+        last: last_index as usize,
+    };
 
     commands.spawn((
         SpriteSheetBundle {
+            texture_atlas: sprite_sheet.0.clone(),
+            sprite: TextureAtlasSprite::new(animation_indices.first),
             transform: Transform::from_translation(Vec3::new(
                 window.width() / 2.0,
                 window.height() / 2.0,
                 0.0,
-            )),
-            sprite: TextureAtlasSprite::new(player_sprite),
-            texture_atlas: tilemap.0.clone(),
+            )).with_scale(Vec3::splat(5.0)),
             ..default()
         },
+        animation_indices,
+        AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
         Player {},
     ));
 }
@@ -82,21 +97,22 @@ pub fn confine_movement(
     }
 }
 
-pub fn load_player_sprites(
-    mut commands: Commands,
-    assets_server: Res<AssetServer>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+pub fn animate_sprite(
+    time: Res<Time>,
+    mut query: Query<(
+        &AnimationIndices,
+        &mut AnimationTimer,
+        &mut TextureAtlasSprite,
+    )>,
 ) {
-    let player_movement_handle = get_texture_atlas(
-        "sprites/player_movement.png".to_string(),
-        10,
-        1,
-        None,
-        PLAYER_SIZE,
-        PLAYER_SIZE,
-        &mut texture_atlases,
-        &assets_server,
-    );
-
-    commands.insert_resource(PlayerMovementSheet(player_movement_handle));
+    for (indices, mut timer, mut sprite) in &mut query {
+        timer.tick(time.delta());
+        if timer.just_finished() {
+            sprite.index = if sprite.index == indices.last {
+                indices.first
+            } else {
+                sprite.index + 1
+            };
+        }
+    }
 }

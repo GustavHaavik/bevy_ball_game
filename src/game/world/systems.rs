@@ -18,9 +18,9 @@ pub fn init_world(mut commands: Commands, tilemap: Res<TileMap>) {
             let noise_value = noise.get_noise(x as f32 / NOISE_SCALE, y as f32 / NOISE_SCALE);
 
             let sprite: usize = if noise_value > 0.15 {
-                get_index(DIRT).unwrap() as usize
+                get_index(DIRT, 12) as usize
             } else {
-                get_index(WATER).unwrap() as usize
+                get_index(WATER, 12) as usize
             };
 
             noise_map.insert(Tile {
